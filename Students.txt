@@ -1,0 +1,5 @@
+
+Name Surname HW1 HW2 HW3 HW4 HW5 Exam
+Rahim Ahmed 8 9 10 6 10 9
+Karim Hasan 7 10 8 5 4 6
+Nadia Islam 9 8 7 10 9 8
