@@ -7,18 +7,51 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <random>
 
 using namespace std;
 
-int main()
+void sortStudents(vector<Person>& students)
 {
-    vector<Person> students;
+    sort(students.begin(), students.end(),
+        [](const Person& a, const Person& b)
+        {
+            if (a.getSurname() == b.getSurname())
+                return a.getFirstName() < b.getFirstName();
+
+            return a.getSurname() < b.getSurname();
+        });
+}
+
+void printStudents(const vector<Person>& students)
+{
+    cout << '\n'
+         << left << setw(15) << "Name"
+         << setw(15) << "Surname"
+         << right << setw(15) << "Final (Avg.)"
+         << setw(15) << "Final (Med.)" << '\n';
+
+    cout << string(60, '-') << '\n';
+
+    for (const Person& student : students)
+    {
+        cout << left << setw(15) << student.getFirstName()
+             << setw(15) << student.getSurname()
+             << right << fixed << setprecision(2)
+             << setw(15) << student.calculateAverage()
+             << setw(15) << student.calculateMedian()
+             << '\n';
+    }
+}
+
+bool readStudentsFromFile(vector<Person>& students)
+{
     ifstream file("Students.txt");
 
     if (!file.is_open())
     {
         cerr << "Error: Could not open Students.txt\n";
-        return 1;
+        return false;
     }
 
     string line;
@@ -38,17 +71,21 @@ int main()
 
         if (!(ss >> name >> surname))
         {
-            cerr << "Warning: Invalid student row skipped.\n";
+            cerr << "Warning: Invalid row skipped.\n";
             continue;
         }
 
         while (ss >> mark)
-            marks.push_back(mark);
+        {
+            if (mark < 0 || mark > 10)
+                break;
 
-        // Five homework marks and one exam mark are expected
+            marks.push_back(mark);
+        }
+
         if (marks.size() < 2)
         {
-            cerr << "Warning: Not enough marks for "
+            cerr << "Warning: Not enough valid marks for "
                  << name << " " << surname << '\n';
             continue;
         }
@@ -61,40 +98,85 @@ int main()
         students.push_back(student);
     }
 
-    file.close();
+    return !students.empty();
+}
 
-    if (students.empty())
+void generateRandomStudents(vector<Person>& students)
+{
+    int count;
+
+    cout << "How many students should be generated? ";
+    if (!(cin >> count) || count <= 0)
     {
-        cerr << "No student records found.\n";
+        cerr << "Invalid number of students.\n";
+        return;
+    }
+
+    random_device rd;
+    mt19937 generator(rd());
+    uniform_int_distribution<int> markDistribution(0, 10);
+
+    for (int i = 1; i <= count; i++)
+    {
+        vector<int> homework;
+
+        // Generate five homework marks
+        for (int j = 0; j < 5; j++)
+            homework.push_back(markDistribution(generator));
+
+        int exam = markDistribution(generator);
+
+        Person student;
+        student.setData(
+            "Name" + to_string(i),
+            "Surname" + to_string(i),
+            homework,
+            exam
+        );
+
+        students.push_back(student);
+    }
+}
+
+int main()
+{
+    vector<Person> students;
+    int choice;
+
+    cout << "Student Grade Calculator\n";
+    cout << "1. Read students from Students.txt\n";
+    cout << "2. Generate random students\n";
+    cout << "Choose an option: ";
+
+    if (!(cin >> choice))
+    {
+        cerr << "Invalid choice.\n";
         return 1;
     }
 
-    // Sort students by surname, then first name
-    sort(students.begin(), students.end(),
-        [](const Person& a, const Person& b)
-        {
-            if (a.getSurname() == b.getSurname())
-                return a.getFirstName() < b.getFirstName();
-
-            return a.getSurname() < b.getSurname();
-        });
-
-    cout << left << setw(15) << "Name"
-         << setw(15) << "Surname"
-         << right << setw(15) << "Final (Avg.)"
-         << setw(15) << "Final (Med.)" << '\n';
-
-    cout << string(60, '-') << '\n';
-
-    for (const Person& student : students)
+    if (choice == 1)
     {
-        cout << left << setw(15) << student.getFirstName()
-             << setw(15) << student.getSurname()
-             << right << fixed << setprecision(2)
-             << setw(15) << student.calculateAverage()
-             << setw(15) << student.calculateMedian()
-             << '\n';
+        if (!readStudentsFromFile(students))
+        {
+            cerr << "Could not load student data.\n";
+            return 1;
+        }
     }
+    else if (choice == 2)
+    {
+        generateRandomStudents(students);
+
+        if (students.empty())
+            return 1;
+    }
+    else
+    {
+        cerr << "Please choose 1 or 2.\n";
+        return 1;
+    }
+
+    sortStudents(students);
+    printStudents(students);
 
     return 0;
 }
