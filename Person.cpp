@@ -1,7 +1,7 @@
+
 #include "Person.h"
 #include <algorithm>
 #include <iomanip>
-#include <limits>
 
 Person::Person()
 {
@@ -36,7 +36,6 @@ Person& Person::operator=(const Person& other)
 
 Person::~Person()
 {
-  
 }
 
 istream& operator>>(istream& in, Person& person)
@@ -78,16 +77,12 @@ ostream& operator<<(ostream& out, const Person& person)
 double Person::calculateAverage() const
 {
     if (homework.empty())
-    {
         return 0.6 * exam;
-    }
 
     double sum = 0;
 
     for (int mark : homework)
-    {
         sum += mark;
-    }
 
     double average = sum / homework.size();
 
@@ -97,26 +92,19 @@ double Person::calculateAverage() const
 double Person::calculateMedian() const
 {
     if (homework.empty())
-    {
         return 0.6 * exam;
-    }
 
     vector<int> sortedHomework = homework;
-
     sort(sortedHomework.begin(), sortedHomework.end());
 
+    int n = static_cast<int>(sortedHomework.size());
     double median;
-    int n = sortedHomework.size();
 
     if (n % 2 == 1)
-    {
         median = sortedHomework[n / 2];
-    }
     else
-    {
         median = (sortedHomework[n / 2 - 1]
                 + sortedHomework[n / 2]) / 2.0;
-    }
 
     return 0.4 * median + 0.6 * exam;
 }
@@ -130,7 +118,19 @@ string Person::getSurname() const
 {
     return surname;
 }
+
 double Person::getFinalGrade() const
 {
     return finalGrade;
+}
+
+void Person::setData(const string& name,
+                     const string& lastName,
+                     const vector<int>& hw,
+                     int examMark)
+{
+    firstName = name;
+    surname = lastName;
+    homework = hw;
+    exam = examMark;
 }
