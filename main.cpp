@@ -1,4 +1,4 @@
-
+```cpp
 #include "Person.h"
 #include <iostream>
 #include <iomanip>
@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <string>
 #include <random>
+#include <limits>
 
 using namespace std;
 
@@ -23,27 +23,6 @@ void sortStudents(vector<Person>& students)
         });
 }
 
-void printStudents(const vector<Person>& students)
-{
-    cout << '\n'
-         << left << setw(15) << "Name"
-         << setw(15) << "Surname"
-         << right << setw(15) << "Final (Avg.)"
-         << setw(15) << "Final (Med.)" << '\n';
-
-    cout << string(60, '-') << '\n';
-
-    for (const Person& student : students)
-    {
-        cout << left << setw(15) << student.getFirstName()
-             << setw(15) << student.getSurname()
-             << right << fixed << setprecision(2)
-             << setw(15) << student.calculateAverage()
-             << setw(15) << student.calculateMedian()
-             << '\n';
-    }
-}
-
 bool readStudentsFromFile(vector<Person>& students)
 {
     ifstream file("Students.txt");
@@ -55,9 +34,7 @@ bool readStudentsFromFile(vector<Person>& students)
     }
 
     string line;
-
-    // Skip the header row
-    getline(file, line);
+    getline(file, line); // Skip header
 
     while (getline(file, line))
     {
@@ -70,22 +47,24 @@ bool readStudentsFromFile(vector<Person>& students)
         int mark;
 
         if (!(ss >> name >> surname))
-        {
-            cerr << "Warning: Invalid row skipped.\n";
             continue;
-        }
+
+        bool valid = true;
 
         while (ss >> mark)
         {
             if (mark < 0 || mark > 10)
+            {
+                valid = false;
                 break;
+            }
 
             marks.push_back(mark);
         }
 
-        if (marks.size() < 2)
+        if (!valid || marks.size() < 2)
         {
-            cerr << "Warning: Not enough valid marks for "
+            cerr << "Skipping invalid row: "
                  << name << " " << surname << '\n';
             continue;
         }
@@ -105,26 +84,26 @@ void generateRandomStudents(vector<Person>& students)
 {
     int count;
 
-    cout << "How many students should be generated? ";
+    cout << "How many students? ";
+
     if (!(cin >> count) || count <= 0)
     {
-        cerr << "Invalid number of students.\n";
+        cerr << "Invalid student count.\n";
         return;
     }
 
     random_device rd;
     mt19937 generator(rd());
-    uniform_int_distribution<int> markDistribution(0, 10);
+    uniform_int_distribution<int> distribution(0, 10);
 
     for (int i = 1; i <= count; i++)
     {
         vector<int> homework;
 
-        // Generate five homework marks
         for (int j = 0; j < 5; j++)
-            homework.push_back(markDistribution(generator));
+            homework.push_back(distribution(generator));
 
-        int exam = markDistribution(generator);
+        int exam = distribution(generator);
 
         Person student;
         student.setData(
@@ -144,7 +123,7 @@ int main()
     int choice;
 
     cout << "Student Grade Calculator\n";
-    cout << "1. Read students from Students.txt\n";
+    cout << "1. Read from Students.txt\n";
     cout << "2. Generate random students\n";
     cout << "Choose an option: ";
 
@@ -158,7 +137,7 @@ int main()
     {
         if (!readStudentsFromFile(students))
         {
-            cerr << "Could not load student data.\n";
+            cerr << "No valid student records found.\n";
             return 1;
         }
     }
@@ -175,8 +154,42 @@ int main()
         return 1;
     }
 
+    int method;
+
+    cout << "\nChoose final grade calculation:\n";
+    cout << "1. Average\n";
+    cout << "2. Median\n";
+    cout << "Choice: ";
+
+    if (!(cin >> method) || (method != 1 && method != 2))
+    {
+        cerr << "Invalid calculation choice.\n";
+        return 1;
+    }
+
     sortStudents(students);
-    printStudents(students);
+
+    cout << '\n'
+         << left << setw(15) << "Name"
+         << setw(15) << "Surname"
+         << right << setw(15)
+         << (method == 1 ? "Final (Avg.)" : "Final (Med.)")
+         << '\n';
+
+    cout << string(45, '-') << '\n';
+
+    for (const Person& student : students)
+    {
+        double grade = (method == 1)
+            ? student.calculateAverage()
+            : student.calculateMedian();
+
+        cout << left << setw(15) << student.getFirstName()
+             << setw(15) << student.getSurname()
+             << right << fixed << setprecision(2)
+             << setw(15) << grade << '\n';
+    }
 
     return 0;
 }
+```
