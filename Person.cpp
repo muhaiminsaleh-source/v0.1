@@ -1,7 +1,8 @@
-
+```cpp
 #include "Person.h"
 #include <algorithm>
 #include <iomanip>
+#include <limits>
 
 Person::Person()
 {
@@ -54,12 +55,31 @@ istream& operator>>(istream& in, Person& person)
 
     while (in >> mark && mark != -1)
     {
+        if (mark < 0 || mark > 10)
+        {
+            cout << "Mark must be between 0 and 10. Try again: ";
+            continue;
+        }
+
         person.homework.push_back(mark);
         cout << "Enter next homework mark (-1 to finish): ";
     }
 
-    cout << "Enter exam mark: ";
-    in >> person.exam;
+    if (in.fail())
+        return in;
+
+    cout << "Enter exam mark (0-10): ";
+
+    while (in >> person.exam)
+    {
+        if (person.exam >= 0 && person.exam <= 10)
+            break;
+
+        cout << "Invalid mark. Enter a mark from 0 to 10: ";
+    }
+
+    if (in)
+        person.finalGrade = person.calculateAverage();
 
     return in;
 }
@@ -79,7 +99,7 @@ double Person::calculateAverage() const
     if (homework.empty())
         return 0.6 * exam;
 
-    double sum = 0;
+    double sum = 0.0;
 
     for (int mark : homework)
         sum += mark;
@@ -95,16 +115,21 @@ double Person::calculateMedian() const
         return 0.6 * exam;
 
     vector<int> sortedHomework = homework;
+
     sort(sortedHomework.begin(), sortedHomework.end());
 
     int n = static_cast<int>(sortedHomework.size());
     double median;
 
     if (n % 2 == 1)
+    {
         median = sortedHomework[n / 2];
+    }
     else
+    {
         median = (sortedHomework[n / 2 - 1]
                 + sortedHomework[n / 2]) / 2.0;
+    }
 
     return 0.4 * median + 0.6 * exam;
 }
@@ -133,4 +158,7 @@ void Person::setData(const string& name,
     surname = lastName;
     homework = hw;
     exam = examMark;
+
+    finalGrade = calculateAverage();
 }
+```
