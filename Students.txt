@@ -1,4 +1,5 @@
-Name Surname HW1 HW2 HW3 HW4 HW5 Exam
-Rahim Ahmed 8 9 10 6 10 9
-Karim Hasan 7 10 8 5 4 6
-Nadia Islam 9 8 7 10 9 8
+Name        Surname    HW1   HW2   HW3   HW4   HW5   Exam
+Jahid       Hasan        8     9    10     6    10      9
+Rahim       Uddin        7    10     8     5     4      6
+Karim       Ahmed        9     9     9     9     9      8
+Suma        Akter        10   10     8     7    10     10
