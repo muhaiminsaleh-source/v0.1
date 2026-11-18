@@ -1,38 +1,17 @@
 #ifndef PERSON_H
 #define PERSON_H
-
-#include <iostream>
 #include <string>
-#include <vector>
-
 class Person {
-private:
+    private:
     std::string name;
     std::string surname;
-    std::vector<int> hw;
-    int exam;
-
-public:
-    Person();
-
-    Person(const Person& other);
-
-    Person& operator=(const Person& other);
-
-    ~Person();
-
-    void setName(std::string n) { name = n; }
-    void setSurname(std::string s) { surname = s; }
-    std::string getName() const { return name; }
-    std::string getSurname() const { return surname; }
-    
-    void generateRandomScores(int numHw);
-
-    double calculateFinalAverage() const;
-    double calculateFinalMedian() const;
-
-    friend std::istream& operator>>(std::istream& is, Person& p);
-    friend std::ostream& operator<<(std::ostream& os, const Person& p);
+    double finalgrade;
+    public:
+    person();
+    person(std::string n, std::std::string s, double grade);
+    std::string getname() const;
+    std::string getsurname() const;
+    double getFinalGrade() const;
 };
-
+bool comparebyGrade(const Person& a, const Person& b);
 #endif
