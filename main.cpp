@@ -1,81 +1,65 @@
-#include "Person.h"
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <algorithm>
-#include <iomanip>
+#include <chrono>
+#include <string>
+#include "Person.h"
+#include "FileHandler.h"
 
 using namespace std;
 
-bool compareByName(const Person& a, const Person& b) {
-    if (a.getName() == b.getName()) {
-        return a.getSurname() < b.getSurname();
+void testFile(int count) {
+    string filename = "students_" + to_string(count) + ".txt";
+    cout << "\n--- Testing " << count << " records ---\n";
+
+    try {
+        generateFile(filename, count);
+
+        vector<Person> students;
+        vector<Person> passed;
+        vector<Person> failed;
+
+        // 1. Read time
+        auto start = chrono::high_resolution_clock::now();
+        readFile(filename, students);
+        auto end = chrono::high_resolution_clock::now();
+        cout << "1. Read time:  " << chrono::duration<double>(end - start).count() << " s\n";
+
+        // 2. Sort time
+        start = chrono::high_resolution_clock::now();
+        sort(students.begin(), students.end(), compareByGrade);
+        end = chrono::high_resolution_clock::now();
+        cout << "2. Sort time:  " << chrono::duration<double>(end - start).count() << " s\n";
+
+        // 3. Split time
+        start = chrono::high_resolution_clock::now();
+        for (size_t i = 0; i < students.size(); i++) {
+            if (students[i].getFinalGrade() < 5.0) {
+                failed.push_back(students[i]);
+            } else {
+                passed.push_back(students[i]);
+            }
+        }
+        end = chrono::high_resolution_clock::now();
+        cout << "3. Split time: " << chrono::duration<double>(end - start).count() << " s\n";
+
+        // 4. Write time
+        start = chrono::high_resolution_clock::now();
+        writeFile("failed_" + to_string(count) + ".txt", failed);
+        writeFile("passed_" + to_string(count) + ".txt", passed);
+        end = chrono::high_resolution_clock::now();
+        cout << "4. Write time: " << chrono::duration<double>(end - start).count() << " s\n";
+
+    } catch (const exception& e) {
+        cerr << "Error: " << e.what() << "\n";
     }
-    return a.getName() < b.getName();
 }
 
 int main() {
-    vector<Person> students;
-    int choice;
+    int sizes[5] = {1000, 10000, 100000, 1000000, 10000000};
 
-    cout << "Select an option:\n";
-    cout << "1. Enter data manually\n";
-    cout << "2. Generate random homework and exam scores\n";
-    cout << "3. Read from Students.txt\n";
-    cout << "Your choice: ";
-    cin >> choice;
-
-    if (choice == 1) {
-        int n;
-        cout << "How many students? ";
-        cin >> n;
-        cin.ignore();
-        for (int i = 0; i < n; ++i) {
-            Person p;
-            cout << "Enter (Name Surname HW_Marks... Exam_Mark) in one line:\n";
-            cin >> p;
-            students.push_back(p);
-        }
-    } 
-    else if (choice == 2) {
-        int n, hwCount;
-        cout << "How many students? ";
-        cin >> n;
-        cout << "How many homeworks per student? ";
-        cin >> hwCount;
-        for (int i = 0; i < n; ++i) {
-            Person p;
-            p.setName("Name" + to_string(i + 1));
-            p.setSurname("Surname" + to_string(i + 1));
-            p.generateRandomScores(hwCount);
-            students.push_back(p);
-        }
-    } 
-    else if (choice == 3) {
-        ifstream file("Students.txt");
-        if (!file) {
-            cout << "Error: Cannot open Students.txt\n";
-            return 1;
-        }
-        string headerLine;
-        getline(file, headerLine);
-        Person p;
-        while (file >> p) {
-            students.push_back(p);
-        }
-        file.close();
-    } else {
-        cout << "Invalid choice!\n";
-        return 1;
-    }
-
-    sort(students.begin(), students.end(), compareByName);
-
-    cout << "\n" << left << setw(15) << "Name" << setw(15) << "Surname" 
-         << "Final (Avg.) | Final (Med.)\n";
-    cout << "------------------------------------------------------\n";
-    for (const auto& student : students) {
-        cout << student << "\n";
+    for (int i = 0; i < 5; i++) {
+        testFile(sizes[i]);
     }
 
     return 0;
