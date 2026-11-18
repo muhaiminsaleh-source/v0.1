@@ -56,7 +56,7 @@ void testList(int count) {
         cout << "1. Read:  " << chrono::duration<double>(end - start).count() << " s\n";
 
         start = chrono::high_resolution_clock::now();
-        students.sort(compareByGrade); // list-er nijer sort()
+        students.sort(compareByGrade);
         end = chrono::high_resolution_clock::now();
         cout << "2. Sort:  " << chrono::duration<double>(end - start).count() << " s\n";
 
@@ -80,6 +80,10 @@ void testList(int count) {
 
 int main() {
     int sizes[5] = {1000, 10000, 100000, 1000000, 10000000};
+
+    for (int i = 0; i < 5; i++) {
+        generateFile("students_" + to_string(sizes[i]) + ".txt", sizes[i]);
+    }
 
     for (int i = 0; i < 5; i++) testDeque(sizes[i]);
     for (int i = 0; i < 5; i++) testList(sizes[i]);
