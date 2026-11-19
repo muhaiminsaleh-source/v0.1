@@ -78,3 +78,57 @@ v0.1
 | **100,000** | 0.04110 | 0.02284 | 0.01526 | 0.10963 |
 | **1,000,000** | 0.54437 | 0.41037 | 0.17957 | 0.51539 |
 | **10,000,000** | 4.09491 | 8.35362 | 1.68509 | 6.69925 |
+
+
+## Releases Overview
+- **v0.1**: Basic student grade calculator using `Person` class and `std::vector`.
+- **v0.2**: Added file generation, sorting, splitting into passed/failed files, and exception handling.
+- **v0.25**: Added `std::deque` and `std::list` implementations with speed benchmarks.
+- **v1.0**: Added interactive menu, Strategy 1 vs Strategy 2 comparison, `<algorithm>` optimization, `Makefile`, and `CMakeLists.txt`.
+## How to Build and Run (v1.0)
+### Using Make (Linux / macOS / Codespaces)
+1. Compile the program:
+   ```bash
+   make
+   ```
+2. Run the application:
+   ```bash
+   ./app
+   ```
+3. Clean build and generated files:
+   ```bash
+   make clean
+   ```
+### Using CMake (Cross-platform)
+```bash
+mkdir build && cd build
+cmake ..
+cmake --build .
+./app
+```
+## v1.0 Benchmark Results (Splitting Speed in Seconds)
+### Strategy 1 (Two new containers: `passed` & `failed`)
+| Records | `std::vector` | `std::deque` | `std::list` |
+| :--- | :--- | :--- | :--- |
+| 1,000 | 0.000059 s | 0.000088 s | 0.000096 s |
+| 10,000 | 0.000690 s | 0.000505 s | 0.000689 s |
+| 100,000 | 0.009029 s | 0.004917 s | 0.006454 s |
+| 1,000,000 | 0.099808 s | 0.057785 s | 0.084052 s |
+### Strategy 2 (One new container: `failed`, shrink original)
+| Records | `std::vector` | `std::deque` | `std::list` |
+| :--- | :--- | :--- | :--- |
+| 1,000 | 0.000044 s | 0.000029 s | 0.000028 s |
+| 10,000 | 0.000624 s | 0.000358 s | 0.000227 s |
+| 100,000 | 0.007019 s | 0.003929 s | 0.002086 s |
+| 1,000,000 | 0.068535 s | 0.043045 s | 0.020564 s |
+### Optimized `std::vector` using `<algorithm>` (`remove_copy_if` + `remove_if`)
+| Records | Strategy 1 (Vector) | Strategy 2 (Vector) | Optimized Vector (`<algorithm>`) |
+| :--- | :--- | :--- | :--- |
+| 1,000 | 0.000059 s | 0.000044 s | 0.000035 s |
+| 10,000 | 0.000690 s | 0.000624 s | 0.000522 s |
+| 100,000 | 0.009029 s | 0.007019 s | 0.004000 s |
+| 1,000,000 | 0.099808 s | 0.068535 s | 0.046224 s |
+## Analysis of Results
+- **Strategy 1 vs Strategy 2**: Strategy 2 uses less memory because it only creates one new container (`failed`) and shrinks the original container. It was also faster across all containers.
+- **Container Performance**: In Strategy 2, `std::list` was the fastest (0.0205 s for 1M records) because erasing elements from a linked list is O(1) without shifting data.
+- **Algorithm Optimization**: Refactoring `std::vector` with `std::remove_copy_if` and `std::remove_if` improved its speed significantly (from 0.0998 s in Strategy 1 and 0.0685 s in Strategy 2 down to 0.0462 s for 1M records).
